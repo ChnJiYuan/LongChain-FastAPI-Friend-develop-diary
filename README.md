@@ -36,6 +36,7 @@ LongChain-FastAPI-Friend/
     api-demo.ipynb         Demo notebook
   tests/
     README.md              Test plan and coverage notes
+  frontend/               React UI scaffold (src/, public/, package.json)
 
 ## Local environment snapshot (2025-12-02)
 - Python/Conda: Python 3.13.5, conda 24.11.3.
@@ -49,3 +50,8 @@ LongChain-FastAPI-Friend/
 - The planned `gpu_inference/` components (LLM + SD) can use the available RTX 5070 Ti; ensure PyTorch builds match CUDA 13.0.
 - Stable Diffusion assets above can be wired into `sd_generator.py` (point to the WebUI models dir or load via diffusers).
 - For RAG/LLM acceleration, enable `torch.cuda.is_available()` checks in `config.py` and prefer GPU-backed embeddings/inference when present.
+
+## Scaffold status (2025-12-02)
+- Backend: FastAPI app (`backend/main.py`) with stub routers for chat/memory/image/generate/agent; config has device/paths and SD model dir pointing to local WebUI weights.
+- Frontend: React scaffold placeholders (`frontend/src`, `public`, `package.json`), pending toolchain (Vite/CRA) and styling setup.
+- Docs/examples/tests: placeholder files created per layout.
