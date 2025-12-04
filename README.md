@@ -55,3 +55,11 @@ LongChain-FastAPI-Friend/
 - Backend: FastAPI app (`backend/main.py`) with stub routers for chat/memory/image/generate/agent; config has device/paths and SD model dir pointing to local WebUI weights.
 - Frontend: React scaffold placeholders (`frontend/src`, `public`, `package.json`), pending toolchain (Vite/CRA) and styling setup.
 - Docs/examples/tests: placeholder files created per layout.
+
+
+## Development Milestones
+
+- **Milestone 1:** Local LLM chat (partially complete) - add health checks and model configuration
+- **Milestone 2:** RAG/tool calling demo integration - connect frontend and backend
+- **Milestone 3:** Session management + error handling + basic tests - improve README
+- **Milestone 4:** Optional cloud model switching and containerized deployment scripts
