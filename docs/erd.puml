@@ -1,0 +1,114 @@
+@startuml ERD
+!theme plain
+
+entity USER {
+  *user_id : string <<PK>>
+  --
+  display_name : string
+  privacy_level : string
+  profile_blob : json
+  created_at : datetime
+}
+
+entity CONVERSATION {
+  *session_id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  title : string
+  created_at : datetime
+}
+
+entity MESSAGE {
+  *message_id : string <<PK>>
+  --
+  session_id : string <<FK>>
+  role : string
+  content : text
+  modality : string
+  privacy_level : string
+  created_at : datetime
+}
+
+entity VECTOR_CHUNK {
+  *vector_id : string <<PK>>
+  --
+  message_id : string <<FK>>
+  chunk_text : text
+  source : string
+  metadata : json
+  embedding : vector
+}
+
+entity MEMORY_ITEM {
+  *memory_id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  key : string
+  value : text
+  privacy_level : string
+  updated_at : datetime
+}
+
+entity MEMORY_VECTOR {
+  *mem_vector_id : string <<PK>>
+  --
+  memory_id : string <<FK>>
+  embedding : vector
+  metadata : json
+  collection : string
+}
+
+entity VECTOR_STORE {
+  *collection : string <<PK>>
+  --
+  engine : string
+  metric_type : string
+  index_type : string
+  dim : int
+  params : json
+}
+
+entity IMAGE_ASSET {
+  *image_id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  filename : string
+  path_or_url : string
+  status : string
+  created_at : datetime
+}
+
+entity IMAGE_ANALYSIS {
+  *analysis_id : string <<PK>>
+  --
+  image_id : string <<FK>>
+  caption : text
+  tags_labels : json
+  vision_features : json
+  created_at : datetime
+}
+
+entity IMAGE_GENERATION_JOB {
+  *job_id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  prompt : text
+  steps : int
+  model_used : string
+  status : string
+  output_path : string
+  created_at : datetime
+}
+
+USER ||--o{ CONVERSATION : has
+USER ||--o{ MEMORY_ITEM : stores
+USER ||--o{ IMAGE_ASSET : owns
+USER ||--o{ IMAGE_GENERATION_JOB : submits
+
+CONVERSATION ||--o{ MESSAGE : contains
+MESSAGE ||--o{ VECTOR_CHUNK : embedded_as
+
+IMAGE_ASSET ||--o{ IMAGE_ANALYSIS : produces
+MEMORY_ITEM ||--o{ MEMORY_VECTOR : embedded_as
+
+@enduml

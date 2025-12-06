@@ -1,65 +1,45 @@
-# LongChain-FastAPI-Friend Develop Diary
-A development log for building an AI companion chatbot using LangChain and FastAPI. This repo tracks architecture decisions, backend implementation, memory systems, RAG over real chat logs, and multimodal features (image analysis and generation). Status: early design draft.
+# Membot (LangChain + FastAPI Companion)
 
-## Repository layout
-LongChain-FastAPI-Friend/
-  backend/
-    main.py                FastAPI entry
-    config.py              Model configs and GPU detection
-    routers/
-      chat.py              Text chat API
-      memory.py            User memory APIs (profile, recall)
-      image.py             Image upload and analysis
-      generate.py          Image generation API
-    chains/
-      conversation.py      LangChain conversational chain
-      rag.py               RAG pipeline using chat logs
-      vision.py            Image understanding chain
-      agent.py             Tool-calling chain
-      multimodal.py        Text + image combined reasoning
-    gpu_inference/         CUDA-accelerated models
-      local_llm.py         Local LLM running on GPU
-      sd_generator.py      Stable Diffusion image generator
-      utils.py             GPU utilities and model loaders
-    db/
-      chroma/              Vector store for RAG
-      user_profile.json    Long-term memory data
-    utils/
-      image_utils.py       Image preprocessing helpers
-      prompts.py           Prompt templates
-      logging.py           Structured logging setup
-  docs/
-    architecture.md        High-level design
-    development-diary.md   Build notes and experiments
-    prompt-design.md       Prompting strategies
-  examples/
-    api-demo.ipynb         Demo notebook
-  tests/
-    README.md              Test plan and coverage notes
-  frontend/               React UI scaffold (src/, public/, package.json)
+Membot is a dual-memory chat companion: Memori acts as a structured notebook for durable facts, while Milvus stores dense vector history for similarity recall. FastAPI exposes the orchestration layer, LangChain stitches memories into prompts, and a React/Vite frontend provides the chat surface.
 
-## Local environment snapshot (2025-12-02)
-- Python/Conda: Python 3.13.5, conda 24.11.3.
-- GPU/CUDA: RTX 5070 Ti, driver 581.80, CUDA 13.0 (`nvidia-smi` OK, 16 GB VRAM).
-- Hugging Face cache: `bert-base-uncased`, `openai/clip-vit-large-patch14`, `t5-small` in `C:\Users\USER\.cache\huggingface\hub`.
-- Image generation: Stable Diffusion WebUI at `D:\UniWorkSpace\WorkPlace4Future\Stable-diffussion\stable-diffusion-webui` with models `dreamshaper_8.safetensors`, `majicmixRealistic_v7.safetensors`, `realisticVisionV60B1_v51HyperVAE.safetensors`; SDXL Refiner weights in `D:\UniWorkSpace\WorkPlace4Future\Stable-diffussion\stable-diffusion-xl-refiner-1.0` (`sd_xl_refiner_1.0*.safetensors`).
-- Docker: Docker Desktop installed (`Docker version 28.5.1`); daemon currently not running (cannot reach `dockerDesktopLinuxEngine`).
-- PostgreSQL/pgAdmin: installed in `D:\postgre` (pgAdmin 4 at `D:\postgre\pgAdmin 4\runtime\pgAdmin4.exe`, data directory `D:\postgre\data`).
+## Repository Map
+- `backend/`: FastAPI service, LangChain chains, memory clients, and API routers.
+- `frontend/`: Vite + React UI (dev server in Dockerfile).
+- `infra/`: Milvus compose snippet and helper scripts (for local bootstrapping).
+- `docs/`, `DiaryDocument/`, `EverydayStep/`: design notes and daily logs.
+- `docker-compose.yml`: Brings up Milvus stack + backend + frontend.
+- `.env.example`, `requirements.txt`: environment template and Python deps.
 
-## CUDA integration
-- The planned `gpu_inference/` components (LLM + SD) can use the available RTX 5070 Ti; ensure PyTorch builds match CUDA 13.0.
-- Stable Diffusion assets above can be wired into `sd_generator.py` (point to the WebUI models dir or load via diffusers).
-- For RAG/LLM acceleration, enable `torch.cuda.is_available()` checks in `config.py` and prefer GPU-backed embeddings/inference when present.
+## Architecture (fast path)
+1) API ingress: FastAPI (`backend/app/main.py`) receives chat and admin routes; CORS enabled for the web UI.
+2) Memory write: user turns are written to Memori (structured facts) and Milvus (vector embeddings; fallback in-memory store when Milvus is absent).
+3) Context build: Memori facts + Milvus k-NN results feed prompt assembly in LangChain (`services/chains/chat_chain.py` and `services/llm/prompts.py`).
+4) LLM call: routes to OpenAI or Ollama clients (`services/llm`), returning the answer along with referenced memories.
+5) Frontend: React app calls the FastAPI endpoints and renders conversation + retrieved context.
 
-## Scaffold status (2025-12-02)
-- Backend: FastAPI app (`backend/main.py`) with stub routers for chat/memory/image/generate/agent; config has device/paths and SD model dir pointing to local WebUI weights.
-- Frontend: React scaffold placeholders (`frontend/src`, `public`, `package.json`), pending toolchain (Vite/CRA) and styling setup.
-- Docs/examples/tests: placeholder files created per layout.
+## Tooling & Services
+- `FastAPI` + `uvicorn`: HTTP API and server.
+- `LangChain`, `langchain-openai`: prompt/composition utilities and provider clients.
+- `Memori` SDK (stubbed): structured notebook storage for user profile, facts, and long-term notes.
+- `Milvus` + `MinIO` + `etcd`: vector database stack (compose services `milvus`, `minio`, `etcd`); fallback in-memory vector store when unavailable.
+- `OpenAI API` or `Ollama` (local models): LLM + embeddings providers; configurable via `.env`.
+- `Docker Compose`: one command to run Milvus, storage, backend, and frontend together.
+- `pytest`: backend smoke tests.
+- `React` + `Vite`: SPA frontend, served via the dev server in Docker.
 
+## Memory Split (from 2025-12-06 diary)
+- **Memori = structured notebook**: user profile, key facts, long-term preferences, events; stays human-readable.
+- **Milvus = vector warehouse**: dense embedding search across chat history, image captions, and notes for “have I said this before?” recall.
+- Flow: write to both stores → fetch Memori facts → embed query and search Milvus → merge contexts → call LLM.
 
-## Development Milestones
+## Getting Started
+1) `cp .env.example .env` and fill OpenAI/Ollama/Memori/Milvus settings.
+2) `docker-compose up -d` to start Milvus + MinIO + backend + frontend.
+3) (Optional) `python infra/scripts/init_milvus.py` to create the chat collection and index.
+4) Local dev without Docker: `uvicorn app.main:app --reload --app-dir backend`.
+5) Tests: `pytest backend/app/tests`.
 
-- **Milestone 1:** Local LLM chat (partially complete) - add health checks and model configuration
-- **Milestone 2:** RAG/tool calling demo integration - connect frontend and backend
-- **Milestone 3:** Session management + error handling + basic tests - improve README
-- **Milestone 4:** Optional cloud model switching and containerized deployment scripts
+## Notes
+- Memori client methods are placeholders; swap in the official SDK when available.
+- Frontend styling and API bindings live in `frontend/`; backend chains and memory clients are in `backend/app/services/`.
+- The repo name in code can stay as-is; the product name is **Membot**.
