@@ -26,6 +26,7 @@ class Settings:
     memori_project_id: str = os.getenv("MEMORI_PROJECT_ID", "companion-assistant")
     memori_api_key: str = os.getenv("MEMORI_API_KEY", "")
     memori_endpoint: str = os.getenv("MEMORI_ENDPOINT", "https://api.memori.local")
+    memori_storage_url: str = os.getenv("MEMORI_STORAGE_URL", "")  # optional; set for local dev only
 
     milvus_host: str = os.getenv("MILVUS_HOST", "localhost")
     milvus_port: int = int(os.getenv("MILVUS_PORT", "19530"))

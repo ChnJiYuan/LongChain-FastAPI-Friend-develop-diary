@@ -8,4 +8,4 @@ pymilvus>=2.4.0
 sqlalchemy>=2.0.0
 python-dotenv>=1.0.0
 pytest>=8.0.0
-# memori-sdk (add the official package name when available)
+memori>=0.1.0

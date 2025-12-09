@@ -1,8 +1,9 @@
-try:
-    from sqlalchemy.orm import declarative_base
-except Exception:  # pragma: no cover - optional dependency
-    declarative_base = None  # type: ignore
+import logging
 
-Base = declarative_base() if declarative_base else None
+from sqlalchemy.orm import declarative_base
+
+logger = logging.getLogger(__name__)
+
+Base = declarative_base()
 
 __all__ = ["Base"]

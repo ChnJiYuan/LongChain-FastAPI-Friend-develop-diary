@@ -16,6 +16,8 @@ def get_memori_client() -> MemoriClient:
         project_id=settings.memori_project_id,
         api_key=settings.memori_api_key,
         endpoint=settings.memori_endpoint,
+        storage_url=settings.memori_storage_url,
+        openai_api_key=settings.openai_api_key,
     )
 
 
