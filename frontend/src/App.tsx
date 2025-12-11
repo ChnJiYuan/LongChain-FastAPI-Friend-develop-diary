@@ -56,109 +56,111 @@ function App({ apiBase }: AppProps = {}) {
   return (
     <div className="page">
       <div className="halo" aria-hidden="true" />
-      <header className="hero">
-        <div className="badge-row">
-          <span className="badge">Membot</span>
-          <span className="pill">API: {resolvedApiBase}</span>
-        </div>
-        <div className="headline">
-          <div>
-            <p className="eyebrow">Dual memory surface</p>
-            <h1>Chat with dual memory</h1>
-            <p className="subhead">Memori holds structured facts; Milvus brings semantic recall.</p>
+      <div className="content">
+        <header className="hero">
+          <div className="badge-row">
+            <span className="badge">Membot</span>
+            <span className="pill">API: {resolvedApiBase}</span>
           </div>
-          <div className="stat-row">
-            <div className="stat">
-              <span className="stat__label">Turns</span>
-              <span className="stat__value">{stats.turns}</span>
+          <div className="headline">
+            <div>
+              <p className="eyebrow">Dual memory surface</p>
+              <h1>Chat with dual memory</h1>
+              <p className="subhead">Memori holds structured facts; Milvus brings semantic recall.</p>
             </div>
-            <div className="stat">
-              <span className="stat__label">Milvus hits</span>
-              <span className="stat__value">{stats.milvusHits}</span>
-            </div>
-            <div className="stat">
-              <span className="stat__label">Memori</span>
-              <span className={`stat__dot ${stats.hasMemori ? 'stat__dot--on' : ''}`} />
-              <span className="stat__value">{stats.hasMemori ? 'hydrated' : 'pending'}</span>
+            <div className="stat-row">
+              <div className="stat">
+                <span className="stat__label">Turns</span>
+                <span className="stat__value">{stats.turns}</span>
+              </div>
+              <div className="stat">
+                <span className="stat__label">Milvus hits</span>
+                <span className="stat__value">{stats.milvusHits}</span>
+              </div>
+              <div className="stat">
+                <span className="stat__label">Memori</span>
+                <span className={`stat__dot ${stats.hasMemori ? 'stat__dot--on' : ''}`} />
+                <span className="stat__value">{stats.hasMemori ? 'hydrated' : 'pending'}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="layout">
-        <section className="panel panel--chat">
-          <form className="chat__form" onSubmit={handleSubmit}>
-            <div className="input-grid">
-              <label className="label">
-                User ID
-                <input
-                  aria-label="User ID"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="user-123"
-                />
-              </label>
-              <label className="label label--grow">
-                Message
-                <textarea
-                  aria-label="Message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask me anything..."
-                  rows={3}
-                />
-              </label>
-            </div>
-            <div className="form-footer">
-              <button type="submit" disabled={disabled}>
-                {loading ? 'Sending...' : 'Send'}
-              </button>
-              {error && <p className="error" role="alert">{error}</p>}
-            </div>
-          </form>
+        <main className="layout">
+          <section className="panel panel--chat">
+            <form className="chat__form" onSubmit={handleSubmit}>
+              <div className="input-grid">
+                <label className="label">
+                  User ID
+                  <input
+                    aria-label="User ID"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="user-123"
+                  />
+                </label>
+                <label className="label label--grow">
+                  Message
+                  <textarea
+                    aria-label="Message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Ask me anything..."
+                    rows={3}
+                  />
+                </label>
+              </div>
+              <div className="form-footer">
+                <button type="submit" disabled={disabled}>
+                  {loading ? 'Sending...' : 'Send'}
+                </button>
+                {error && <p className="error" role="alert">{error}</p>}
+              </div>
+            </form>
 
-          <div className="chat__history" aria-label="Chat history">
-            {history.length === 0 ? (
-              <p className="muted">No messages yet. Start the first turn.</p>
-            ) : (
-              history.map((msg, idx) => (
-                <div key={idx} className={`bubble bubble--${msg.role}`}>
-                  <span className="bubble__role">{msg.role}</span>
-                  <p>{msg.content}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+            <div className="chat__history" aria-label="Chat history">
+              {history.length === 0 ? (
+                <p className="muted">No messages yet. Start the first turn.</p>
+              ) : (
+                history.map((msg, idx) => (
+                  <div key={idx} className={`bubble bubble--${msg.role}`}>
+                    <span className="bubble__role">{msg.role}</span>
+                    <p>{msg.content}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
 
-        <aside className="panel panel--context">
-          <h2>Retrieved context</h2>
-          <div className="context__block">
-            <div className="context__header">
-              <h3>Memori</h3>
-              <span className={`chip ${memoriContext ? 'chip--on' : ''}`}>
-                {memoriContext ? 'Ready' : 'Waiting'}
-              </span>
+          <aside className="panel panel--context">
+            <h2>Retrieved context</h2>
+            <div className="context__block">
+              <div className="context__header">
+                <h3>Memori</h3>
+                <span className={`chip ${memoriContext ? 'chip--on' : ''}`}>
+                  {memoriContext ? 'Ready' : 'Waiting'}
+                </span>
+              </div>
+              <pre>{memoriContext || 'No Memori context yet.'}</pre>
             </div>
-            <pre>{memoriContext || 'No Memori context yet.'}</pre>
-          </div>
-          <div className="context__block">
-            <div className="context__header">
-              <h3>Milvus</h3>
-              <span className="chip chip--ghost">{milvusChunks.length} hit(s)</span>
+            <div className="context__block">
+              <div className="context__header">
+                <h3>Milvus</h3>
+                <span className="chip chip--ghost">{milvusChunks.length} hit(s)</span>
+              </div>
+              {milvusChunks.length === 0 ? (
+                <p className="muted">No Milvus hits yet.</p>
+              ) : (
+                <ul>
+                  {milvusChunks.map((chunk, i) => (
+                    <li key={i}>{chunk}</li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {milvusChunks.length === 0 ? (
-              <p className="muted">No Milvus hits yet.</p>
-            ) : (
-              <ul>
-                {milvusChunks.map((chunk, i) => (
-                  <li key={i}>{chunk}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </aside>
-      </main>
+          </aside>
+        </main>
+      </div>
     </div>
   )
 }

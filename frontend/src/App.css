@@ -25,9 +25,20 @@ body {
 
 .page {
   position: relative;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 48px 24px 72px;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, 100%);
+  display: grid;
+  gap: 16px;
+  justify-items: center;
 }
 
 .halo {
@@ -41,11 +52,10 @@ body {
 }
 
 .hero {
-  position: relative;
-  z-index: 1;
+  width: 100%;
   display: grid;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .badge-row {
@@ -137,8 +147,7 @@ body {
 }
 
 .layout {
-  position: relative;
-  z-index: 1;
+  width: 100%;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 16px;
