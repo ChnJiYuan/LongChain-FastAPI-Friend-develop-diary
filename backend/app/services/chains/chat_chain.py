@@ -11,7 +11,7 @@ from app.utils.id_generator import new_trace_id
 class ChatResult:
     reply: str
     memori_context: str
-    milvus_hits: List[str]
+    milvus_chunks: List[str]
     trace_id: str
 
 
@@ -34,6 +34,6 @@ class ChatChain:
         return ChatResult(
             reply=reply,
             memori_context=context.memori_context,
-            milvus_hits=context.milvus_chunks,
+            milvus_chunks=context.milvus_chunks,
             trace_id=new_trace_id(),
         )

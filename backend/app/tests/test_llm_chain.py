@@ -25,4 +25,4 @@ def test_chat_chain_runs():
     chain = ChatChain(memory_service=DummyMemory(), llm_router=DummyRouter())
     result = asyncio.run(chain.run(user_id="u1", message="hello"))
     assert result.reply
-    assert result.milvus_hits == ["a"]
+    assert result.milvus_chunks == ["a"]

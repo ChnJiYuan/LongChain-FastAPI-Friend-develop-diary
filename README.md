@@ -38,6 +38,13 @@ Membot is a dual-memory chat companion: Memori acts as a structured notebook for
 3) (Optional) `python infra/scripts/init_milvus.py` to create the chat collection and index.
 4) Local dev without Docker: `uvicorn app.main:app --reload --app-dir backend`.
 5) Tests: `pytest backend/app/tests`.
+6) Postgres (dev only): Compose seeds `postgres` service using `POSTGRES_*` in `.env` and runs `infra/db/init.sql`. Replace creds and use a managed DB for prod.
+
+## API Contract (v1)
+- `POST /api/v1/chat`: body `{ "user_id": "...", "message": "...", "images": ["<base64>"] }` (user_id/message are trimmed; 1-128 chars for user_id, 1-4000 chars for message; up to 5 images, no empty strings). Returns `{ reply, memori_context, milvus_chunks, trace_id }`. Optional header `X-API-Key` if configured.
+- `GET /api/v1/memory/{user_id}`: returns Memori/Milvus context snapshot for debugging.
+- `GET /api/v1/memory/health`: health check for Memori/Milvus connectivity and current embedder.
+- `POST /api/v1/memory/{user_id}`: write content into Memori and Milvus.
 
 ## Notes
 - Memori client methods are placeholders; swap in the official SDK when available.

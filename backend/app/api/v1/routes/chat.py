@@ -8,7 +8,17 @@ from app.services.chains.chat_chain import ChatChain
 router = APIRouter()
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post(
+    "/chat",
+    response_model=ChatResponse,
+    summary="Send a chat message",
+    response_description="Assistant reply plus retrieved Memori/Milvus context.",
+    description=(
+        "Accepts a user message (and optional base64 images) to run the chat chain. "
+        "Returns the assistant reply, Memori structured context, Milvus semantic hits, "
+        "and a trace id for log correlation. Request fields are trimmed and validated."
+    ),
+)
 async def chat(
     payload: ChatRequest,
     chain: ChatChain = Depends(deps.get_chat_chain),
@@ -22,6 +32,6 @@ async def chat(
     return ChatResponse(
         reply=result.reply,
         memori_context=result.memori_context,
-        milvus_hits=result.milvus_hits,
+        milvus_chunks=result.milvus_chunks,
         trace_id=result.trace_id,
     )

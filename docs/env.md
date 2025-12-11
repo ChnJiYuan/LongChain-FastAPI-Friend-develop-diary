@@ -22,7 +22,8 @@ This repo uses a single `.env` file (copied from `.env.example`) consumed by `do
 - `EMBEDDING_DIM` is also read by `infra/scripts/init_milvus.py` to size the collection.
 
 ## App persistence (FastAPI)
-- `DATABASE_URL`: prefer PostgreSQL/MySQL in production; use SQLite only for local experiments.
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`: used by Docker Compose to seed the Postgres container.
+- `DATABASE_URL`: backend SQLAlchemy URL. For dev, defaults to `postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}`; override with strong creds for prod.
 
 ## Ollama (local LLM)
 - `OLLAMA_BASE_URL`: typically `http://localhost:11434` when running Ollama locally.

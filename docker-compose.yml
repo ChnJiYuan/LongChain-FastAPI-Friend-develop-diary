@@ -83,15 +83,16 @@ services:
     image: postgres:16-alpine
     container_name: membot-postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: qsnnb666
-      POSTGRES_DB: membot
+      POSTGRES_USER: ${POSTGRES_USER:-membot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-membot_password}
+      POSTGRES_DB: ${POSTGRES_DB:-membot}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-membot}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -99,4 +100,4 @@ services:
 volumes:
   milvus-data:
   minio-data:
-  pg-data:
+  postgres-data:
