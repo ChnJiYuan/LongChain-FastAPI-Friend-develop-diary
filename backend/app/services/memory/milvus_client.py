@@ -81,7 +81,16 @@ class MilvusClient:
         self._collection_handle = collection
 
     def upsert(self, user_id: str, content: str, embedding: List[float], metadata: Optional[Dict[str, Any]] = None) -> None:
-        if Collection is None or self._collection_handle is None:
+        # Fallback when Milvus is unavailable or embedding doesn't match collection dim
+        expected_dim = None
+        if self._collection_handle is not None:
+            try:
+                vector_field = next((f for f in self._collection_handle.schema.fields if f.dtype == DataType.FLOAT_VECTOR), None)
+                expected_dim = getattr(vector_field, "params", {}).get("dim") if vector_field else None
+            except Exception:
+                expected_dim = None
+
+        if Collection is None or self._collection_handle is None or (expected_dim and len(embedding) != expected_dim):
             self._local_store.append((user_id, content, metadata or {}, embedding))
             logger.debug("Stored message in local Milvus fallback store")
             return
@@ -121,4 +130,7 @@ class MilvusClient:
             return True
         except MilvusException as exc:
             logger.error("Milvus ping failed: %s", exc)
+            return False
+        except Exception as exc:  # pragma: no cover - safety net for unexpected errors
+            logger.error("Milvus ping unexpected failure: %s", exc)
             return False
