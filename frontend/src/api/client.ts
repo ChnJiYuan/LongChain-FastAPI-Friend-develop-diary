@@ -9,10 +9,16 @@ export type ChatResponse = {
   milvus_chunks?: string[]
 }
 
-export async function sendChat(baseUrl: string, payload: ChatRequest): Promise<ChatResponse> {
+export async function sendChat(baseUrl: string, payload: ChatRequest, apiKey?: string): Promise<ChatResponse> {
+  const resolvedKey = (apiKey ?? import.meta.env.VITE_API_KEY)?.trim()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (resolvedKey) {
+    headers['X-API-Key'] = resolvedKey
+  }
+
   const res = await fetch(`${baseUrl}/api/v1/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ user_id: payload.userId, message: payload.message }),
   })
 

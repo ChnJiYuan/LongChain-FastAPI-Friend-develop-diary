@@ -30,6 +30,7 @@ This repo uses a single `.env` file (copied from `.env.example`) consumed by `do
 
 ## Frontend (Vite)
 - `VITE_API_BASE_URL`: backend URL the SPA should call (e.g., `http://localhost:8000`).
+- `VITE_API_KEY` (optional): if backend enforces `X-API-Key`, set the key so the frontend attaches it automatically.
 
 ## Docker usage
 1) Copy `.env.example` to `.env` and fill secrets before running Docker.
