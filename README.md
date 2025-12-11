@@ -33,7 +33,7 @@ Membot is a dual-memory chat companion: Memori acts as a structured notebook for
 - Flow: write to both stores → fetch Memori facts → embed query and search Milvus → merge contexts → call LLM.
 
 ## Getting Started
-1) `cp .env.example .env` and fill OpenAI/Ollama/Memori/Milvus settings.
+1) `cp .env.example .env` and fill OpenAI/Ollama/Memori/Milvus settings (see `docs/env.md` for all variables).
 2) `docker-compose up -d` to start Milvus + MinIO + backend + frontend.
 3) (Optional) `python infra/scripts/init_milvus.py` to create the chat collection and index.
 4) Local dev without Docker: `uvicorn app.main:app --reload --app-dir backend`.

@@ -17,7 +17,7 @@ services:
       retries: 3
 
   minio:
-    image: minio/minio:RELEASE.2024-12-05T06-33-25Z
+    image: minio/minio:latest
     container_name: milvus-minio
     environment:
       MINIO_ACCESS_KEY: minioadmin
@@ -48,16 +48,21 @@ services:
       - "19530:19530"
       - "9091:9091"
     command: ["milvus", "run", "standalone"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     env_file:
       - ./.env
     depends_on:
       milvus:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8000:8000"
 
@@ -74,6 +79,24 @@ services:
       - "5173:5173"
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: membot-postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: qsnnb666
+      POSTGRES_DB: membot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   milvus-data:
   minio-data:
+  pg-data:
