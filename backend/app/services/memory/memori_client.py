@@ -53,7 +53,11 @@ class MemoriClient:
             SessionLocal = sessionmaker(bind=engine)
             kwargs["conn"] = SessionLocal
 
-        client = Memori(**kwargs)
+        try:
+            client = Memori(**kwargs)
+        except TypeError as exc:  # pragma: no cover - sdk signature mismatch
+            logger.warning("Memori SDK signature mismatch, running in fallback mode: %s", exc)
+            return None
 
         # Optional: register OpenAI client if provided (enables Memori-managed embeddings/LLM)
         if self.openai_api_key and hasattr(client, "openai"):

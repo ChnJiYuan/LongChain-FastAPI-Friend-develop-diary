@@ -18,7 +18,11 @@ class OllamaClient:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.post(
                     f"{self.base_url}/api/generate",
-                    json={"model": self.model, "prompt": prompt},
+                    json={
+                        "model": self.model,
+                        "prompt": prompt,
+                        "stream": False,  # return a single JSON object
+                    },
                 )
                 resp.raise_for_status()
                 data = resp.json()
