@@ -42,6 +42,15 @@ Membot is a dual-memory chat companion: Memori acts as a structured notebook for
 5) Tests: `pytest backend/app/tests`.
 6) Postgres (dev only): Compose seeds `postgres` service using `POSTGRES_*` in `.env` and runs `infra/db/init.sql`. Replace creds and use a managed DB for prod.
 
+## Local Runtime (desktop-friendly)
+- Backend + DB + Milvus 一键：`docker-compose up -d --build`（前置：Docker Desktop 运行中；如本地 LLM/SD 在宿主机，保持 `OLLAMA_BASE_URL=http://host.docker.internal:11434`, `SD_BASE_URL=http://host.docker.internal:7860`，如启用 Gemini/云图生填好 `GEMINI_*`）。
+- 前端 Web：`cd frontend && npm run dev` 访问 `http://localhost:5173`。
+- 桌面版（Electron 开发）：终端 A `npm run dev`，终端 B `npm run electron:dev`（加载 dev server）。生产包：`npm run electron:build`，安装包输出在 `frontend/release/`。
+- 本地 WebUI (SD) 启动示例：`python webui.py --api --listen --port 7860`（或在 `webui-user.bat` 的 `COMMANDLINE_ARGS` 添加 `--api --listen --port 7860`）。
+- 快速检查：
+  - `curl.exe -H "X-API-Key: qsnnb666" http://localhost:8000/api/v1/memory/health`
+  - `curl.exe -H "X-API-Key: qsnnb666" http://localhost:8000/api/v1/image/health`
+
 ## API Contract (v1)
 - `POST /api/v1/chat`: body `{ "user_id": "...", "message": "...", "images": ["<base64>"] }` (user_id/message are trimmed; 1-128 chars for user_id, 1-4000 chars for message; up to 5 images, no empty strings). Returns `{ reply, memori_context, milvus_chunks, trace_id }`. Optional header `X-API-Key` if configured.
 - `GET /api/v1/memory/{user_id}`: returns Memori/Milvus context snapshot for debugging.
