@@ -17,6 +17,18 @@ This repo uses a single `.env` file (copied from `.env.example`) consumed by `do
 - `MEMORI_PROJECT_ID`, `MEMORI_API_KEY`, `MEMORI_ENDPOINT`.
 - `MEMORI_STORAGE_URL` (optional, dev-only): set to a real DB DSN if you want Memori to persist via SQL; avoid SQLite in production.
 
+## Stable Diffusion (local image gen)
+- `SD_ENABLED`: toggle local SD usage.
+- `SD_BASE_URL`: e.g., `http://host.docker.internal:7860` (Automatic1111 WebUI default).
+- `SD_MODEL`: optional model/ checkpoint name if your SD API supports switching.
+
+## Gemini / Banana (cloud image gen)
+- `GEMINI_ENABLED`: toggle cloud image generation.
+- `GEMINI_BASE_URL`: proxy/base URL to your Gemini/Banana endpoint.
+- `GEMINI_API_KEY`: API key or auth token for the cloud service.
+- `GEMINI_MODEL`: target model name.
+- `IMAGE_PROVIDER`: `local` | `cloud` | `auto` (auto: try local first, fallback to cloud).
+
 ## Milvus (vector memory)
 - `MILVUS_HOST`, `MILVUS_PORT`, `MILVUS_USER`, `MILVUS_PASSWORD`, `MILVUS_COLLECTION`, `MILVUS_DATABASE`, `MILVUS_TLS`.
 - `EMBEDDING_DIM` is also read by `infra/scripts/init_milvus.py` to size the collection.

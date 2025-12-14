@@ -23,6 +23,16 @@ class Settings:
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     llm_provider: str = os.getenv("LLM_PROVIDER", "openai")  # openai | ollama | mock
 
+    sd_enabled: bool = os.getenv("SD_ENABLED", "false").lower() == "true"
+    sd_base_url: str = os.getenv("SD_BASE_URL", "http://localhost:7860")
+    sd_model: str = os.getenv("SD_MODEL", "")
+
+    gemini_enabled: bool = os.getenv("GEMINI_ENABLED", "false").lower() == "true"
+    gemini_base_url: str = os.getenv("GEMINI_BASE_URL", "")
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
+    gemini_model: str = os.getenv("GEMINI_MODEL", "")
+    image_provider: str = os.getenv("IMAGE_PROVIDER", "auto")  # local | cloud | auto
+
     memori_project_id: str = os.getenv("MEMORI_PROJECT_ID", "companion-assistant")
     memori_api_key: str = os.getenv("MEMORI_API_KEY", "")
     memori_endpoint: str = os.getenv("MEMORI_ENDPOINT", "https://api.memori.local")

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.routes import admin, chat, health, memory
+from app.api.v1.routes import admin, chat, health, image, memory
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.services.persistence.db import init_db
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router, prefix="/health", tags=["health"])
     app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])
     app.include_router(memory.router, prefix=settings.api_prefix, tags=["memory"])
+    app.include_router(image.router, prefix=settings.api_prefix, tags=["image"])
     app.include_router(admin.router, prefix=settings.api_prefix, tags=["admin"])
 
     return app

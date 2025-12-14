@@ -16,6 +16,7 @@ Membot is a dual-memory chat companion: Memori acts as a structured notebook for
 3) Context build: Memori facts + Milvus k-NN results feed prompt assembly in LangChain (`services/chains/chat_chain.py` and `services/llm/prompts.py`).
 4) LLM call: routes to OpenAI or Ollama clients (`services/llm`), returning the answer along with referenced memories.
 5) Frontend: React app calls the FastAPI endpoints and renders conversation + retrieved context.
+6) Image generation (planned): local Stable Diffusion or cloud Gemini (Banana) via unified image API (`IMAGE_PROVIDER` controls local/cloud/auto).
 
 ## Tooling & Services
 - `FastAPI` + `uvicorn`: HTTP API and server.
@@ -23,6 +24,7 @@ Membot is a dual-memory chat companion: Memori acts as a structured notebook for
 - `Memori` SDK (stubbed): structured notebook storage for user profile, facts, and long-term notes.
 - `Milvus` + `MinIO` + `etcd`: vector database stack (compose services `milvus`, `minio`, `etcd`); fallback in-memory vector store when unavailable.
 - `OpenAI API` or `Ollama` (local models): LLM + embeddings providers; configurable via `.env`.
+- Image gen providers (planned): local Stable Diffusion (`SD_BASE_URL`) and cloud Gemini/Banana (`GEMINI_BASE_URL`, `GEMINI_API_KEY`), selectable via `IMAGE_PROVIDER`.
 - `Docker Compose`: one command to run Milvus, storage, backend, and frontend together.
 - `pytest`: backend smoke tests.
 - `React` + `Vite`: SPA frontend, served via the dev server in Docker.
