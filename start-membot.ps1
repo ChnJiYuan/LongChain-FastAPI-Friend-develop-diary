@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $apiKey = "qsnnb666"
+$desktopExe = Join-Path $repoRoot "frontend\release\Membot.exe"
 $healthUrls = @(
   "http://localhost:8000/health",
   "http://localhost:8000/api/v1/memory/health",
@@ -48,13 +49,16 @@ docker-compose up -d --build
 
 Wait-Health
 
-# 启动 Electron 桌面版（开发模式，使用 Vite dev server）
-Write-Host "启动桌面端 (Electron dev)..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit","-Command","cd `"$repoRoot/frontend`"; npm run dev" | Out-Null
-Start-Sleep -Seconds 2
-Start-Process powershell -ArgumentList "-NoExit","-Command","cd `"$repoRoot/frontend`"; npm run electron:dev" | Out-Null
+if (Test-Path $desktopExe) {
+  Write-Host "启动桌面端 (生产包)..." -ForegroundColor Cyan
+  Start-Process -FilePath $desktopExe | Out-Null
+} else {
+  Write-Warning "未找到生产版 exe：$desktopExe`n请先在 frontend/ 运行 npm run build && npm run electron:build"
+}
 
 Write-Host "`n全部启动完成：" -ForegroundColor Green
 Write-Host "  前端（浏览器）: http://localhost:5173"
 Write-Host "  API           : http://localhost:8000"
-Write-Host "  桌面端        : 已打开新终端运行 electron:dev"
+Write-Host "  桌面端        : " -NoNewline
+if (Test-Path $desktopExe) { Write-Host "已启动生产版 exe ($desktopExe)" }
+else { Write-Host "未启动（缺少 exe）" }
