@@ -1,5 +1,3 @@
-@echo off
-Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -26,7 +24,7 @@ function Wait-Health {
     $allOk = $true
     foreach ($url in $healthUrls) {
       try {
-        $resp = Invoke-RestMethod -UseBasicParsing -Headers @{ "X-API-Key" = $apiKey } -Uri $url -TimeoutSec 5
+        $null = Invoke-RestMethod -UseBasicParsing -Headers @{ "X-API-Key" = $apiKey } -Uri $url -TimeoutSec 5
         Write-Host "$url => OK" -ForegroundColor Green
       } catch {
         $allOk = $false
@@ -36,7 +34,7 @@ function Wait-Health {
     if ($allOk) { return }
     Start-Sleep -Seconds $DelaySeconds
   }
-  Write-Warning "健康检查未全部通过，继续启动前端（可稍后再重试）。"
+  Write-Warning "健康检查未全部通过，继续启动桌面端（可稍后再重试）。"
 }
 
 Write-Host "定位仓库目录: $repoRoot" -ForegroundColor Cyan
