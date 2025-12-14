@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
-import { sendChat } from './api/client'
+import { generateImage, sendChat } from './api/client'
 
 type ChatMessage = {
   role: 'user' | 'assistant'
@@ -21,6 +21,11 @@ function App({ apiBase }: AppProps = {}) {
   const [milvusChunks, setMilvusChunks] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imagePrompt, setImagePrompt] = useState('')
+  const [imageResult, setImageResult] = useState<string | null>(null)
+  const [imageProvider, setImageProvider] = useState<string | null>(null)
+  const [imageLoading, setImageLoading] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
 
   const disabled = useMemo(() => loading || !message.trim(), [loading, message])
   const stats = useMemo(
@@ -50,6 +55,24 @@ function App({ apiBase }: AppProps = {}) {
       setError(err instanceof Error ? err.message : 'Request failed')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleImage = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!imagePrompt.trim()) return
+    setImageLoading(true)
+    setImageError(null)
+    setImageResult(null)
+    setImageProvider(null)
+    try {
+      const res = await generateImage(resolvedApiBase, { prompt: imagePrompt })
+      setImageResult(res.image_base64)
+      setImageProvider(res.provider)
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Image request failed')
+    } finally {
+      setImageLoading(false)
     }
   }
 
@@ -157,6 +180,31 @@ function App({ apiBase }: AppProps = {}) {
                   ))}
                 </ul>
               )}
+            </div>
+            <div className="context__block">
+              <div className="context__header">
+                <h3>Image</h3>
+                <span className="chip chip--ghost">{imageProvider || 'Idle'}</span>
+              </div>
+              <form className="image__form" onSubmit={handleImage}>
+                <input
+                  aria-label="Image prompt"
+                  value={imagePrompt}
+                  onChange={(e) => setImagePrompt(e.target.value)}
+                  placeholder="Describe an image to generate"
+                />
+                <button type="submit" disabled={imageLoading || !imagePrompt.trim()}>
+                  {imageLoading ? 'Generating...' : 'Generate'}
+                </button>
+              </form>
+              {imageError && <p className="error" role="alert">{imageError}</p>}
+              <div className="image__preview">
+                {imageResult ? (
+                  <img src={`data:image/png;base64,${imageResult}`} alt="Generated" />
+                ) : (
+                  <p className="muted">No image yet.</p>
+                )}
+              </div>
             </div>
           </aside>
         </main>
