@@ -64,7 +64,9 @@ services:
       milvus:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./data/images:/app/data/images
 
   frontend:
     build:

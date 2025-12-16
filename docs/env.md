@@ -28,6 +28,7 @@ This repo uses a single `.env` file (copied from `.env.example`) consumed by `do
 - `GEMINI_API_KEY`: API key or auth token for the cloud service.
 - `GEMINI_MODEL`: target model name.
 - `IMAGE_PROVIDER`: `local` | `cloud` | `auto` (auto: try local first, fallback to cloud).
+- `IMAGE_SAVE_DIR`: directory where generated images are persisted (relative paths are resolved by the backend).
 
 ## Milvus (vector memory)
 - `MILVUS_HOST`, `MILVUS_PORT`, `MILVUS_USER`, `MILVUS_PASSWORD`, `MILVUS_COLLECTION`, `MILVUS_DATABASE`, `MILVUS_TLS`.

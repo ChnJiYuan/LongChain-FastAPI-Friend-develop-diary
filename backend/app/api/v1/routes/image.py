@@ -1,3 +1,7 @@
+import base64
+import logging
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import settings
@@ -8,6 +12,7 @@ from app.services.vision.sd_client import StableDiffusionClient
 from app.utils.id_generator import new_trace_id
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def get_sd_client() -> StableDiffusionClient:
@@ -87,9 +92,27 @@ async def generate_image(
             continue
         try:
             img = await fn(client, payload)  # type: ignore[arg-type]
-            return ImageResponse(image_base64=img, provider=name, trace_id=trace_id)
+            file_path = _save_image(img, trace_id)
+            return ImageResponse(image_base64=img, provider=name, trace_id=trace_id, file_path=file_path)
         except Exception as exc:  # noqa: BLE001
             last_err = exc
             continue
 
     raise HTTPException(status_code=502, detail=f"Image generation failed: {last_err or 'no provider available'}")
+
+
+def _save_image(img_b64: str, trace_id: str) -> str | None:
+    """Persist image bytes to disk if possible; best-effort (returns None on failure)."""
+    try:
+        root = Path(settings.image_save_dir)
+        root.mkdir(parents=True, exist_ok=True)
+        # Handle possible data URL prefix
+        if "base64," in img_b64:
+            img_b64 = img_b64.split("base64,", 1)[1]
+        data = base64.b64decode(img_b64)
+        target = root / f"image-{trace_id}.png"
+        target.write_bytes(data)
+        return str(target.resolve())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to save image: %s", exc)
+        return None

@@ -42,6 +42,7 @@ export type ImageResponse = {
   image_base64: string
   provider: string
   trace_id: string
+  file_path?: string
 }
 
 export async function generateImage(baseUrl: string, payload: ImageRequest, apiKey?: string): Promise<ImageResponse> {

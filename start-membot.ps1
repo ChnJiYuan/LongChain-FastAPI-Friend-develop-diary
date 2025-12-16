@@ -2,11 +2,12 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $apiKey = "qsnnb666"
+$apiPort = if ($env:API_PORT) { $env:API_PORT } else { 8000 }
 $desktopExe = Join-Path $repoRoot "frontend\release\Membot.exe"
 $healthUrls = @(
-  "http://localhost:8000/health",
-  "http://localhost:8000/api/v1/memory/health",
-  "http://localhost:8000/api/v1/image/health"
+  "http://localhost:$apiPort/health",
+  "http://localhost:$apiPort/api/v1/memory/health",
+  "http://localhost:$apiPort/api/v1/image/health"
 )
 
 function Require-Docker {
@@ -56,7 +57,10 @@ if (Test-Path $desktopExe) {
 
 Write-Host "`n全部启动完成：" -ForegroundColor Green
 Write-Host "  前端（浏览器）: http://localhost:5173"
-Write-Host "  API           : http://localhost:8000"
+Write-Host "  API           : http://localhost:$apiPort"
 Write-Host "  桌面端        : " -NoNewline
 if (Test-Path $desktopExe) { Write-Host "已启动生产版 exe ($desktopExe)" }
 else { Write-Host "未启动（缺少 exe）" }
+
+
+

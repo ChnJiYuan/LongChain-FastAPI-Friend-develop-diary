@@ -32,6 +32,7 @@ class Settings:
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     gemini_model: str = os.getenv("GEMINI_MODEL", "")
     image_provider: str = os.getenv("IMAGE_PROVIDER", "auto")  # local | cloud | auto
+    image_save_dir: str = os.getenv("IMAGE_SAVE_DIR", "./data/images")
 
     memori_project_id: str = os.getenv("MEMORI_PROJECT_ID", "companion-assistant")
     memori_api_key: str = os.getenv("MEMORI_API_KEY", "")

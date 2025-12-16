@@ -24,6 +24,8 @@ function App({ apiBase }: AppProps = {}) {
   const [imagePrompt, setImagePrompt] = useState('')
   const [imageResult, setImageResult] = useState<string | null>(null)
   const [imageProvider, setImageProvider] = useState<string | null>(null)
+  const [imageFilePath, setImageFilePath] = useState<string | null>(null)
+  const [imageTraceId, setImageTraceId] = useState<string | null>(null)
   const [imageLoading, setImageLoading] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
 
@@ -65,15 +67,30 @@ function App({ apiBase }: AppProps = {}) {
     setImageError(null)
     setImageResult(null)
     setImageProvider(null)
+    setImageFilePath(null)
+    setImageTraceId(null)
     try {
       const res = await generateImage(resolvedApiBase, { prompt: imagePrompt })
       setImageResult(res.image_base64)
       setImageProvider(res.provider)
+      setImageFilePath(res.file_path ?? null)
+      setImageTraceId(res.trace_id ?? null)
     } catch (err) {
       setImageError(err instanceof Error ? err.message : 'Image request failed')
     } finally {
       setImageLoading(false)
     }
+  }
+
+  const handleSaveImage = () => {
+    if (!imageResult) return
+    const dataUrl = `data:image/png;base64,${imageResult}`
+    const link = document.createElement('a')
+    link.href = dataUrl
+    link.download = imageTraceId ? `image-${imageTraceId}.png` : 'generated.png'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
@@ -200,11 +217,21 @@ function App({ apiBase }: AppProps = {}) {
               {imageError && <p className="error" role="alert">{imageError}</p>}
               <div className="image__preview">
                 {imageResult ? (
-                  <img src={`data:image/png;base64,${imageResult}`} alt="Generated" />
+                  <>
+                    <img src={`data:image/png;base64,${imageResult}`} alt="Generated" />
+                    <div className="image__actions">
+                      <button type="button" onClick={handleSaveImage}>Save to computer</button>
+                    </div>
+                  </>
                 ) : (
                   <p className="muted">No image yet.</p>
                 )}
               </div>
+              {imageFilePath && (
+                <p className="muted" aria-label="Saved image path">
+                  Saved to: {imageFilePath}
+                </p>
+              )}
             </div>
           </aside>
         </main>

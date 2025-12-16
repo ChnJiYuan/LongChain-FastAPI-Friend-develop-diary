@@ -2,7 +2,10 @@ const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const fs = require('fs')
 
-const isDev = process.env.NODE_ENV === 'development'
+// Flags
+const isDevEnv = process.env.NODE_ENV === 'development'
+const forceDevServer = process.env.ELECTRON_FORCE_DEV === '1'
+const forceDevtools = process.env.ELECTRON_OPEN_DEVTOOLS === '1'
 const devUrl = process.env.ELECTRON_DEV_URL || 'http://localhost:5173'
 
 function createWindow() {
@@ -17,16 +20,21 @@ function createWindow() {
     },
   })
 
-  if (isDev) {
+  if (isDevEnv || forceDevServer) {
     win.loadURL(devUrl)
     win.webContents.openDevTools({ mode: 'detach' })
   } else {
     const candidate = path.join(__dirname, '..', 'dist', 'index.html')
     const fallback = path.join(process.resourcesPath, 'dist', 'index.html')
     const target = fs.existsSync(candidate) ? candidate : fallback
+    console.log('[electron] loading html:', target)
     win.loadFile(target)
-    // 方便排查打包空白问题：可按需要取消注释
-    // win.webContents.openDevTools({ mode: 'detach' })
+
+    // Uncomment for production debugging or set ELECTRON_OPEN_DEVTOOLS=1
+    if (forceDevtools) {
+      win.webContents.openDevTools({ mode: 'detach' })
+    }
+
     win.webContents.on('did-fail-load', (_e, code, desc, url) => {
       console.error('Load failed', { code, desc, url, target })
     })

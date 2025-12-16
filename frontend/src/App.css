@@ -358,6 +358,12 @@ pre {
   border-radius: 8px;
 }
 
+.image__actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;

@@ -16,3 +16,4 @@ class ImageResponse(BaseModel):
   image_base64: str
   provider: str
   trace_id: str
+  file_path: str | None = Field(None, description="Absolute file path of the saved image, if persisted to disk")
