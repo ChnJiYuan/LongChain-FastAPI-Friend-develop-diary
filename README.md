@@ -33,6 +33,7 @@ Prereqs: Docker Desktop (WSL2 backend on Windows), Stable Diffusion WebUI runnin
    - API port: `API_PORT=18000`
    - API key: `MEMORI_API_KEY=qsnnb666` (frontend also reads `VITE_API_KEY`)
    - Local SD: `SD_ENABLED=true`, `SD_BASE_URL=http://host.docker.internal:7860`
+   - CORS: include your Vite port(s) in `CORS_ORIGINS` (e.g., `http://localhost:5173,http://localhost:5174`)
    - Image persistence: `IMAGE_SAVE_DIR=./data/images` (mounted into the backend container)
 2) Start services: `docker-compose up -d --build`  
    Brings up Milvus + MinIO + etcd + Postgres + backend (FastAPI) + frontend (Vite dev server on 5173).

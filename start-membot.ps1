@@ -1,8 +1,12 @@
 $ErrorActionPreference = "Stop"
 
+# Paths and ports (override via env vars if needed)
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$apiKey = "qsnnb666"
-$apiPort = if ($env:API_PORT) { $env:API_PORT } else { 8000 }
+$apiKey   = "qsnnb666"
+$apiPort  = if ($env:API_PORT) { $env:API_PORT } else { 8000 }
+$sdRoot   = if ($env:SD_WEBUI_ROOT) { $env:SD_WEBUI_ROOT } else { "D:\UniWorkSpace\WorkPlace4Future\Stable-diffussion\stable-diffusion-webui" }
+$sdPort   = if ($env:SD_PORT) { $env:SD_PORT } else { 7860 }
+$sdBase   = if ($env:SD_BASE_URL) { $env:SD_BASE_URL } else { "http://localhost:$sdPort" }
 $desktopExe = Join-Path $repoRoot "frontend\release\Membot.exe"
 $healthUrls = @(
   "http://localhost:$apiPort/health",
@@ -10,17 +14,27 @@ $healthUrls = @(
   "http://localhost:$apiPort/api/v1/image/health"
 )
 
+function Test-SdHealth {
+  param([string]$BaseUrl)
+  try {
+    $resp = Invoke-RestMethod -UseBasicParsing -Uri "$BaseUrl/sdapi/v1/sd-models" -TimeoutSec 5
+    return $resp -ne $null
+  } catch {
+    return $false
+  }
+}
+
 function Require-Docker {
   try { docker info | Out-Null }
   catch {
-    Write-Error "Docker Desktop 未运行或未安装，请先启动 Docker 后再重试。"
+    Write-Error "Docker Desktop is not running. Please start Docker Desktop and retry."
     exit 1
   }
 }
 
-function Wait-Health {
+function Wait-BackendHealth {
   param([int]$Retries = 30, [int]$DelaySeconds = 2)
-  Write-Host "等待后端健康检查通过..." -ForegroundColor Cyan
+  Write-Host "Waiting for backend health checks..." -ForegroundColor Cyan
   for ($i = 0; $i -lt $Retries; $i++) {
     $allOk = $true
     foreach ($url in $healthUrls) {
@@ -29,38 +43,73 @@ function Wait-Health {
         Write-Host "$url => OK" -ForegroundColor Green
       } catch {
         $allOk = $false
-        Write-Host "$url => 未就绪" -ForegroundColor Yellow
+        Write-Host "$url => waiting" -ForegroundColor Yellow
       }
     }
     if ($allOk) { return }
     Start-Sleep -Seconds $DelaySeconds
   }
-  Write-Warning "健康检查未全部通过，继续启动桌面端（可稍后再重试）。"
+  Write-Warning "Backend health checks did not pass in time. The app may still be initializing."
 }
 
-Write-Host "定位仓库目录: $repoRoot" -ForegroundColor Cyan
+function Ensure-LocalSd {
+  param(
+    [string]$BaseUrl,
+    [string]$Root,
+    [int]$Port = 7860,
+    [int]$Retries = 20,
+    [int]$DelaySeconds = 3
+  )
+
+  if (Test-SdHealth $BaseUrl) {
+    Write-Host "Stable Diffusion already running at $BaseUrl" -ForegroundColor Green
+    return
+  }
+
+  if (-not (Test-Path $Root)) {
+    Write-Warning "Stable Diffusion path not found: $Root. Skipping auto-start."
+    return
+  }
+
+  Write-Host "Starting Stable Diffusion WebUI ($Root) on port $Port..." -ForegroundColor Cyan
+  $env:COMMANDLINE_ARGS="--api --listen --port $Port"
+  Start-Process -FilePath (Join-Path $Root 'webui-user.bat') -WorkingDirectory $Root -WindowStyle Minimized | Out-Null
+
+  for ($i = 0; $i -lt $Retries; $i++) {
+    if (Test-SdHealth $BaseUrl) {
+      Write-Host "Stable Diffusion is ready at $BaseUrl" -ForegroundColor Green
+      return
+    }
+    Start-Sleep -Seconds $DelaySeconds
+  }
+
+  Write-Warning "Stable Diffusion did not become healthy within timeout; image API may fail."
+}
+
+Write-Host "Workspace: $repoRoot" -ForegroundColor Cyan
 Set-Location $repoRoot
+
+# Start SD first (best-effort)
+Ensure-LocalSd -BaseUrl $sdBase -Root $sdRoot -Port $sdPort
 
 Require-Docker
 
-Write-Host "启动 Docker Compose (backend + frontend + DB + Milvus)..." -ForegroundColor Cyan
+Write-Host "Starting Docker Compose (backend + frontend + DB + Milvus)..." -ForegroundColor Cyan
 docker-compose up -d --build
 
-Wait-Health
+Wait-BackendHealth
 
 if (Test-Path $desktopExe) {
-  Write-Host "启动桌面端 (生产包)..." -ForegroundColor Cyan
+  Write-Host "Launching desktop app (if built)..." -ForegroundColor Cyan
   Start-Process -FilePath $desktopExe | Out-Null
 } else {
-  Write-Warning "未找到生产版 exe：$desktopExe`n请先在 frontend/ 运行 npm run build && npm run electron:build"
+  Write-Warning "Desktop exe not found: $desktopExe`nBuild it via frontend/ npm run build && npm run electron:build"
 }
 
-Write-Host "`n全部启动完成：" -ForegroundColor Green
-Write-Host "  前端（浏览器）: http://localhost:5173"
+Write-Host "`nReady to use" -ForegroundColor Green
+Write-Host "  Web UI        : http://localhost:5173"
 Write-Host "  API           : http://localhost:$apiPort"
-Write-Host "  桌面端        : " -NoNewline
-if (Test-Path $desktopExe) { Write-Host "已启动生产版 exe ($desktopExe)" }
-else { Write-Host "未启动（缺少 exe）" }
-
-
-
+Write-Host "  SD (expected) : $sdBase"
+Write-Host "  Desktop       : " -NoNewline
+if (Test-Path $desktopExe) { Write-Host "launched (if built) at $desktopExe" }
+else { Write-Host "not built" }
